@@ -1,13 +1,8 @@
 
 # About the project
 
-*Write a short description about the course and add a link to your GitHub repository here. This is an R Markdown (.Rmd) file so you should use R Markdown syntax.*
+I have learned about the course Introduction to Open Data Science through my PhD studies. I'm exited to start the course but also a bit worried about the workload. The course Moodle page seems to contain **a lot** of information, so probably will take a while to get a handle on things. 
 
-```{r}
-# This is a so-called "R chunk" where you can write R code.
+I have previously used R and Rstudio on some courses, but I'm no expert. I think that exercise 1 was too long, and all in all there was too much stuff to be learned about R in the first week. To me, this one really long exercise feels exhausting. It is nice that there are the R codes already embedded, but I feel smaller chunks would be better. If I hadn't done R before, I would be terrified right now.  
 
-date()
-
-```
-The text continues here.
-
+[Link to my GitHub repository](https://github.com/ksuominen/IODS-project)
