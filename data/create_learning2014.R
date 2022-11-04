@@ -23,12 +23,14 @@ lrn14$surf <- rowMeans(lrn14[, surface_questions])
 strategic_questions <- c("ST01","ST09","ST17","ST25","ST04","ST12","ST20","ST28")
 lrn14$stra <- rowMeans(lrn14[, strategic_questions])
 
+#Scaling Attitude back to the original scale of the questions, by dividing it with the number of questions.
+lrn14$attitude <- lrn14$Attitude / 10
+
 #keeping only selected columns
-keep_columns <- c("gender","Age","Attitude", "deep", "stra", "surf", "Points")
+keep_columns <- c("gender","Age","attitude", "deep", "stra", "surf", "Points")
 learning2014 <- select(lrn14, one_of(keep_columns))
                        
 colnames(learning2014)[2] <- "age"
-colnames(learning2014)[3] <- "attitude"
 colnames(learning2014)[7] <- "points"
 
 #excluding observations where exam point variable is zero
