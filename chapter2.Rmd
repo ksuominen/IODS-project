@@ -11,7 +11,7 @@ dim(students2014)
 str(students2014)
 ```
 ## Basic information about dataset 
-Dataset is created from data: https://www.mv.helsinki.fi/home/kvehkala/JYTmooc/JYTOPKYS3-meta.txt
+Dataset is created from data: https://www.mv.helsinki.fi/home/kvehkala/JYTmooc/JYTOPKYS3-meta.txt  
 Data is collected from students in course 'Johdatus yhteiskuntatilastotieteeseen' in fall 2014. 
 
 Dataset students2014 contains 7 variables with 166 observations: gender, age, attitude, deep, stra, surf, and points.
@@ -48,7 +48,7 @@ The median attitude is 3.2 (range 1.4-5). The median attitude of men seems highe
 The median for deep learning is 3.7 (range 1.6-4.9).
 The median for strategic learning is 3.1 (range 1.3-5).
 The median for surface learning is 2.8 (range 1.6-4.3).
-For women, the median for strategic and surface learning is a bit higher than for men. 
+For women, the median for strategic and surface learning seems a bit higher than for men. 
 
 The median for exam points is 23 (range 7-33). The median is about the same in men and women. 
 
@@ -57,9 +57,11 @@ Attitude correlates with exam points, so that with "better" attitude towards sta
 Surface learning correlates negatively with deep and strategic learning as well as attitude. So with better attitude one less often utilizes surface learning. If one utilizes surface learning, one less often utilizes deep or strategic learning. 
 
 ```{r}
+#fit a linear regression model using points as the outcome and attitude, strategig and surface learning as explanatory variables
 my_model <- lm(points ~ attitude + stra + surf, data = students2014)
 summary(my_model)
 
+#remove surface learning from the model, since it's so far from significant
 my_model2 <- lm(points ~ attitude + stra, data = students2014)
 summary(my_model2)
 #error rate
