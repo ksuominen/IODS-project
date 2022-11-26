@@ -3,14 +3,16 @@
 ```{r}
 date()
 ```
-
+  
+## Basic information about dataset   
+  
 ```{r}
 library(tidyverse)
 students2014 <- read_csv("./data/learning2014.csv")
 dim(students2014)
 str(students2014)
 ```
-## Basic information about dataset 
+  
 Dataset is created from data: https://www.mv.helsinki.fi/home/kvehkala/JYTmooc/JYTOPKYS3-meta.txt  
 Data is collected from students in course 'Johdatus yhteiskuntatilastotieteeseen' in fall 2014. 
 
@@ -21,7 +23,9 @@ All variables in the original data related to strategic, deep, and surface learn
 Attitude tells about student's global attitude towards statistics. Variable has been scaled back to the original scale of the questions, by dividing it with the number of questions.
 
 Points tells the course exam points. Observations with points equaling 0 have been excluded, since those students didn't attend the course exam. 
-
+  
+## Describing the data  
+  
 ```{r}
 library(GGally)
 library(ggplot2)
@@ -38,8 +42,7 @@ summary(students2014$stra)
 summary(students2014$surf)
 summary(students2014$points)
 ```
-
-## Describing the data
+  
 There are 66% (110/166) women in respondents.
 The median age is 22 years (range 17-55), the median age of women seems to be a bit lower than that of men.
 
@@ -55,7 +58,9 @@ The median for exam points is 23 (range 7-33). The median is about the same in m
 Attitude correlates with exam points, so that with "better" attitude towards statistics one usually gets higher exam points.
 
 Surface learning correlates negatively with deep and strategic learning as well as attitude. So with better attitude one less often utilizes surface learning. If one utilizes surface learning, one less often utilizes deep or strategic learning. 
-
+  
+## Interpreting the fitted regression model  
+  
 ```{r}
 #fit a linear regression model using points as the outcome and attitude, strategig and surface learning as explanatory variables
 my_model <- lm(points ~ attitude + stra + surf, data = students2014)
@@ -67,8 +72,7 @@ summary(my_model2)
 #error rate
 sigma(my_model2)*100/mean(students2014$points)
 ```
-
-## Interpreting the fitted regression model
+  
 First we choose three variables that correlate the most with points in above visualization (namely attitude, strategic and surface learning). However, after fitting the model, we see that for surface learning there is a really high p-value (0.466), so we remove that and fit the model again with just attitude and strategic learning. 
 
 In the new model, p-value of the F-statistic is 7.734e-09. So at least one of the explanatory variables is significantly associated with exam points.
@@ -80,12 +84,13 @@ For strategic learning, p-value is 0.089. It isn't <0.05 that's usually deemed s
 The adjusted R-squared is 0.1951, which means that attitude (and strategic learning) only explain around 20% of the variance in exam points. 
 
 The residual standard error is 5.289 which corresponds to 23% prediction error rate. 
-
+  
+## Assumptions of the model  
+  
 ```{r}
 plot(my_model2, which=c(1,2,5))
 ```
-
-## Assumptions of the model
+  
 Linear regression assumes a linear relationship between predictors and outcome, that residual errors are normally distributed, that residuals have a constant variance, and independence of residual error terms. 
 
 With **Residuals vs. Fitted** plot we can check the linearity of data. Here, the red line seems to be horizontal at approximately zero, where it should be. So we can assume a linear relationship. 
