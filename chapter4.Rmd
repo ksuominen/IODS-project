@@ -203,6 +203,7 @@ Variables age, black, and tax seem to be the most influential linear separators 
   
 ```{r}
 library(plotly)
+set.seed(123)
 lda.fit3 <- lda(crime ~., data = train)
 model_predictors <- dplyr::select(train, -crime)
 
@@ -224,7 +225,7 @@ plot_ly(x = matrix_product$LD1, y = matrix_product$LD2, z = matrix_product$LD3, 
 plot_ly(x = matrix_product$LD1, y = matrix_product$LD2, z = matrix_product$LD3, type= 'scatter3d', mode='markers', color=clusters)
 ```  
   
-The cluster that is on the right-hand side (at approximately x=-4 and y=2) looks quite same in both plots. In the first plot the clusters are more defined, in the second one they mix more with each other.  
+The cluster that is on the left-hand side seems quite similar in both plots and is quite well defined.. In the second plot the clusters are more defined, in the first plot the rest of the clusters mix more with each other.  
   
   
   
