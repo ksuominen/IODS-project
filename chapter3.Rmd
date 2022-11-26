@@ -3,15 +3,16 @@
 ```{r}
 date()
 ```
-
+  
+## Short description of dataset  
+  
 ```{r}
 library(tidyverse)
 alc <- read_csv("./data/alc.csv")
 dim(alc)
 colnames(alc)
 ```
-
-## Short description of dataset 
+  
 Dataset is created from data: https://archive.ics.uci.edu/ml/datasets/Student+Performance  
 The data approaches student achievement in secondary education of two Portuguese schools, and the dataset joins two student alcohol consumption datasets. The variables not used for joining the two data have been combined by averaging (including the grade variables). 'alc_use' is the average of 'Dalc' and 'Walc'. 'high_use' is TRUE if 'alc_use' is higher than 2 and FALSE otherwise.    
   
@@ -25,7 +26,9 @@ My hypothesis for these variables are:
 2. Those who consume more alcohol have more past class failures compared to those who consume less alcohol.   
 3. Those who consume more alcohol have lower final grades compared to those who consume less alcohol.  
 4. Those who consume more alcohol have more school absences compared to those who consume less alcohol.    
-    
+  
+## Description of chosen variables and their relationships with alcohol consumption  
+  
 ```{r}
 library(dplyr); library(ggplot2); library(GGally); library(finalfit)
 
@@ -57,7 +60,6 @@ alc %>% group_by(sex, high_use) %>% summarise(mean_absences=mean(absences),count
 ggplot(alc, aes(x = high_use, y = absences, col=sex)) + geom_boxplot() + ylab("absences") + ggtitle("Student absences by alcohol consumption and sex")
 ```  
   
-## Description of chosen variables and their relationships with alcohol consumption  
 There are 195 women and 175 men. Of those, 21% (41/195) and 40% (70/175) have high alcohol consumption, respectively. This supports my hypothesis of men consuming more alcohol than women.   
   
 The mean of past class failures is 0.2 (range 0-3). Of high users, 3% (3/111) have 3 failures, 8% (9/111) have 2 failures, and 11% have 1 failure. Of others, 0.4% (1/259) have 3 failures, 3% (8/259) have 2 failures, and 5% have 1 failure. Thus it would seem that students with high alcohol consumption have failed class more often than those with low alcohol consumption.  
@@ -66,7 +68,8 @@ The mean final grade is 11.5 (range 0-18). Men with high alcohol consumption see
   
 The mean number of absences is 4.5 (range 0-45, median 3). The median of school absences is higher for men with high alcohol consumption than other groups. However, if we look at the mean, women with high alcohol consumption have the highest mean of absences, and both men and women with high alcohol consumption have higher mean than those with low alcohol consumption. This is somewhat in line with my hypothesis.   
    
-    
+## Logistic regression    
+  
 ```{r}
 # fit a logistic regression model 
 my_model <- glm(high_use ~ sex + failures + absences + G3, data = alc, family = "binomial")
@@ -91,12 +94,13 @@ cbind(OR, CI)
 
 ```  
    
-## Logistic regression
 In the first model, final grade has a p-value 0.2, and thus isn't associated with high alcohol consumption. Let's fit the model again without it. In the second model, all variables are associated with the outcome, and also the AIC drops from 415.59 to 414.99, which indicates that G3 can be dropped from the model.  
   
 According to this model, high alcohol consumption is associated with being male (OR 2.7, 95% CI 1.7-4.4, p-value <0.001), having failed class (OR 1.8, 95% CI 1.2-2.8, p-value 0.004), and school absences (OR 1.1, 95% CI 1.1-1.2, p-value <0.001).  
 My primary hypothesis were correct regarding being male and having failed classes. However, there is only slight association with school absence (OR 1.1), and the final grade doesn't seem to be associated with high alcohol consumption.   
     
+## Predictive power of the model  
+  
 ```{r}
 # predict() the probability of high_use
 probabilities <- predict(my_model2, type = "response")
@@ -124,9 +128,9 @@ loss_func <- function(class, prob) {
 loss_func(class = alc$high_use, prob = alc$probability)
 ```  
    
-## Predictive power of the model
-In the 2x2 table we can see that 252 low and 33 high alcohol consumers are predicted correctly. In the predictions, however, there are 78 false negatives and 7 false positives. According to the training error, 23% of the individuals are classified inaccurately. This is better than tossing a coin (where the chances would be 50/50), but I guess with some background information one could get quite close with educated guesses.  
- 
+In the 2x2 table we can see that 252 low and 33 high alcohol consumers are predicted correctly. In the predictions, however, there are 78 false negatives and 7 false positives. According to the training error, 23% of the individuals are classified inaccurately. This is better than tossing a coin (where the chances would be 50/50), but I guess with some background information one could get quite close with educated guesses.   
+## 10-fold cross-validation of the model  
+  
 ```{r} 
 # 10-fold cross-validation
 library(boot)
@@ -144,7 +148,6 @@ cv2 <- cv.glm(data = alc, cost = loss_func, glmfit = my_model3, K = 10)
 cv2$delta[1]
 ``` 
     
-## 10-fold cross-validation of the model  
 The prediction error of the model when using 10-fold cross-validation is around 0.24, which is slightly less than in the exercise set.  
 With the other tested model (explanatory variables being sex, home to school travel time, number of school absences, weekly study time, and going out with friends), the prediction error with 10-fold cross-validation is around 0.22, which is still lower.  
   
