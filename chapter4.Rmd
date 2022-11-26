@@ -4,6 +4,8 @@
 date()
 ```
   
+## Short description of dataset  
+  
 ```{r}
 library(MASS)
 # load the data 
@@ -14,9 +16,10 @@ str(Boston)
 dim(Boston)
 ```  
   
-## Short description of dataset   
 The dataset contains housing values in suburbs of Boston. It can be downloaded from R's MASS package, and contains 506 observations of 14 variables. More information on the data and variables can be found here:  https://stat.ethz.ch/R-manual/R-devel/library/MASS/html/Boston.html  
-    
+  
+## Graphical overview of the data and summaries of the variables  
+  
 ```{r}
 library(tidyr)
 # check summary of data
@@ -34,11 +37,12 @@ library(corrplot)
 corrplot(cor_matrix, method="circle")
 ```   
   
-## Graphical overview of the data and summaries of the variables  
 The summary of the data shows means, medians and ranges of the different variables, for example median number of rooms per dwelling is 6.2 (range 3.6-8.8).   
   
 Tax rate and accessibility to radial highways seem to be strongly positively correlated. Median value and lower status of the population are negatively correlated. The plotted correlation matrix shows also other positive and negative correlations. The darker blue a sphere is, the stronger the positive correlation between variables, and the darker red a sphere is, the stronger the negative correlation.      
-      
+   
+## Standardizing the dataset  
+     
 ```{r}
 library(dplyr)
 # center and standardize variables
@@ -77,9 +81,10 @@ train <- boston_scaled[ind,]
 test <- boston_scaled[-ind,]
 ```   
   
-## Standardizing the dataset  
 The variables are now transformed on the same scale, so now we can compare them.  
     
+## Linear discriminant analysis and predictions  
+  
 ```{r}
 # linear discriminant analysis
 lda.fit <- lda(crime ~., data = train)
@@ -120,57 +125,59 @@ lda.pred <- predict(lda.fit, newdata = test)
 table(correct = correct_classes, predicted = lda.pred$class)
 ```   
   
-## Predictions by linear discriminant analysis  
-The model has correctly predicted 17 cases with low crime rate, 13 with low to medium rate, 16 with medium to high rate and 20 with high rate. It would seem that with high crime rate the predictions are most accurate, since only 1/21 is wrongly predicted.  With medium to high there is most inaccuracy.     
-    
+It would seem that with high crime rate the predictions are most accurate. With low to medium and medium to high there is most inaccuracy.     
+   
+## Distance measures and k-means clustering  
+  
 ```{r}
 library(ggplot2)
 set.seed(123)
 data(Boston)
-boston_scaled <- as.data.frame(scale(Boston))
+boston_scaled2 <- as.data.frame(scale(Boston))
 
 # euclidean distance matrix
-dist_eu <- dist(Boston)
+dist_eu <- dist(boston_scaled2)
 summary(dist_eu)
 
 # k-means clustering
-km <- kmeans(Boston, centers = 3)
+km <- kmeans(boston_scaled2, centers = 3)
 
 # plot part of the Boston dataset with clusters
-pairs(Boston[6:10], col = km$cluster)
+pairs(boston_scaled2[6:10], col = km$cluster)
 
 # determine the maximum number of clusters
 k_max <- 10
 
 # calculate the total within sum of squares
-twcss <- sapply(1:k_max, function(k){kmeans(Boston, k)$tot.withinss})
+twcss <- sapply(1:k_max, function(k){kmeans(boston_scaled2, k)$tot.withinss})
 
 # visualize the results
 qplot(x = 1:k_max, y = twcss, geom = 'line')
 
 # k-means clustering
-km <- kmeans(Boston, centers = 2)
+km <- kmeans(boston_scaled2, centers = 2)
 
 # plot the Boston dataset with clusters
-pairs(Boston, col = km$cluster)
+pairs(boston_scaled2, col = km$cluster)
 
 # plot part of the Boston dataset with clusters
-pairs(Boston[6:10], col = km$cluster)
+pairs(boston_scaled2[6:10], col = km$cluster)
 ```   
   
-## Distance measures and k-means clustering  
 From plotting the total within sum of squares we see that around two the value changes quite a lot, so the appropriate number of cluster would be two. The data seems to divide nicely between two clusters according to most variables.  
+  
+## Bonus  
   
 ```{r}
 set.seed(123)
 data(Boston)
-boston_scaled <- as.data.frame(scale(Boston))
+boston_scaled3 <- as.data.frame(scale(Boston))
 
 # k-means clustering
-km <- kmeans(Boston, centers = 3)
+km2 <- kmeans(boston_scaled3, centers = 3)
 
 # linear discriminant analysis
-lda.fit <- lda(km$cluster ~., data = boston_scaled)
+lda.fit2 <- lda(km2$cluster ~., data = boston_scaled3)
 
 # the function for lda biplot arrows
 lda.arrows <- function(x, myscale = 1, arrow_heads = 0.1, color = "red", tex = 0.75, choices = c(1,2)){
@@ -183,35 +190,41 @@ lda.arrows <- function(x, myscale = 1, arrow_heads = 0.1, color = "red", tex = 0
 }
 
 # target classes as numeric
-classes <- as.numeric(km$cluster)
+classes <- as.numeric(km2$cluster)
 
 # plot the lda results
-plot(lda.fit, dimen = 2, col = classes, pch = classes)
-lda.arrows(lda.fit, myscale = 2)
+plot(lda.fit2, dimen = 2, col = classes, pch = classes)
+lda.arrows(lda.fit2, myscale = 4)
 ```  
   
-## Bonus  
-Variables black and rad seem to be the most influential linear separators for the clusters.  
+Variables age, black, and tax seem to be the most influential linear separators for the clusters.  
+  
+## Super-Bonus  
   
 ```{r}
 library(plotly)
-lda.fit <- lda(crime ~., data = train)
+lda.fit3 <- lda(crime ~., data = train)
 model_predictors <- dplyr::select(train, -crime)
 
 # check the dimensions
 dim(model_predictors)
-dim(lda.fit$scaling)
+dim(lda.fit3$scaling)
 
 # matrix multiplication
-matrix_product <- as.matrix(model_predictors) %*% lda.fit$scaling
+matrix_product <- as.matrix(model_predictors) %*% lda.fit3$scaling
 matrix_product <- as.data.frame(matrix_product)
 
 classes <- as.numeric(train$crime)
+train2 <- dplyr::select(train, -crime)
+km3 <- kmeans(train2, centers = 4)
+clusters <- as.numeric(km3$cluster)
 
 plot_ly(x = matrix_product$LD1, y = matrix_product$LD2, z = matrix_product$LD3, type= 'scatter3d', mode='markers', color=classes)
+
+plot_ly(x = matrix_product$LD1, y = matrix_product$LD2, z = matrix_product$LD3, type= 'scatter3d', mode='markers', color=clusters)
 ```  
   
-WebGL actually is supported by my browser, but for some reason this isn't working.  
+The cluster that is on the right-hand side (at approximately x=-4 and y=2) looks quite same in both plots. In the first plot the clusters are more defined, in the second one they mix more with each other.  
   
   
   
