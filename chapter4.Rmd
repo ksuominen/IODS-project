@@ -131,7 +131,6 @@ It would seem that with high crime rate the predictions are most accurate. With 
   
 ```{r}
 library(ggplot2)
-set.seed(123)
 data(Boston)
 boston_scaled2 <- as.data.frame(scale(Boston))
 
@@ -140,6 +139,7 @@ dist_eu <- dist(boston_scaled2)
 summary(dist_eu)
 
 # k-means clustering
+set.seed(123)
 km <- kmeans(boston_scaled2, centers = 3)
 
 # plot part of the Boston dataset with clusters
@@ -149,12 +149,14 @@ pairs(boston_scaled2[6:10], col = km$cluster)
 k_max <- 10
 
 # calculate the total within sum of squares
+set.seed(123)
 twcss <- sapply(1:k_max, function(k){kmeans(boston_scaled2, k)$tot.withinss})
 
 # visualize the results
 qplot(x = 1:k_max, y = twcss, geom = 'line')
 
 # k-means clustering
+set.seed(123)
 km <- kmeans(boston_scaled2, centers = 2)
 
 # plot the Boston dataset with clusters
@@ -169,11 +171,11 @@ From plotting the total within sum of squares we see that around two the value c
 ## Bonus  
   
 ```{r}
-set.seed(123)
 data(Boston)
 boston_scaled3 <- as.data.frame(scale(Boston))
 
 # k-means clustering
+set.seed(123)
 km2 <- kmeans(boston_scaled3, centers = 3)
 
 # linear discriminant analysis
@@ -203,7 +205,6 @@ Variables age, black, and tax seem to be the most influential linear separators 
   
 ```{r}
 library(plotly)
-set.seed(123)
 lda.fit3 <- lda(crime ~., data = train)
 model_predictors <- dplyr::select(train, -crime)
 
@@ -217,6 +218,7 @@ matrix_product <- as.data.frame(matrix_product)
 
 classes <- as.numeric(train$crime)
 train2 <- dplyr::select(train, -crime)
+set.seed(123)
 km3 <- kmeans(train2, centers = 4)
 clusters <- as.numeric(km3$cluster)
 
@@ -225,7 +227,7 @@ plot_ly(x = matrix_product$LD1, y = matrix_product$LD2, z = matrix_product$LD3, 
 plot_ly(x = matrix_product$LD1, y = matrix_product$LD2, z = matrix_product$LD3, type= 'scatter3d', mode='markers', color=clusters)
 ```  
   
-The cluster that is on the left-hand side seems quite similar in both plots and is quite well defined.. In the second plot the clusters are more defined, in the first plot the rest of the clusters mix more with each other.  
+The cluster that is on the left-hand side seems quite similar in both plots and is quite well defined. In the second plot the clusters are more defined, in the first plot the rest of the clusters mix more with each other.  
   
   
   
