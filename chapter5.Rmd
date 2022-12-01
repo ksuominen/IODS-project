@@ -1,0 +1,168 @@
+# Dimensionality reduction techniques
+
+```{r}
+date()
+```
+  
+## Short description of dataset   
+  
+```{r}
+library(tidyverse)
+human <- read_csv("./data/human.csv")
+dim(human)
+str(human)
+```  
+  
+The data originates from the United Nations Development Programme  
+Original data from:   http://hdr.undp.org/en/content/human-development-index-hdi  
+  
+Meta file: https://hdr.undp.org/data-center/human-development-index#/indicies/HDI  
+Technical notes: https://hdr.undp.org/system/files/documents//technical-notes-calculating-human-development-indices.pdf  
+  
+Dataset contains 155 observations of 8 variables.  
+  
+Variable names:      
+"GNI" = Gross National Income per capita  
+"Life.Exp" = Life expectancy at birth  
+"Edu.Exp" = Expected years of schooling   
+"Mat.Mor" = Maternal mortality ratio  
+"Ado.Birth" = Adolescent birth rate  
+"Parli.F" = Percetange of female representatives in parliament  
+"Edu2.FM" = Proportion of females with at least secondary education / Proportion of males with at least secondary education  
+"Labo.FM" = Proportion of females in the labour force / Proportion of males in the labour force   
+  
+Rownames are the countries.  
+      
+## Graphical overview of the data and summaries of the variables  
+  
+```{r}
+library(GGally)
+library(corrplot)
+# check summary of data
+summary(human)
+
+# draw pairs plot of the variables
+ggpairs(human)
+
+# calculate and visualize the correlation matrix
+cor(human) %>% corrplot(., method="circle")
+```  
+  
+Median life expectancy at birth is 74 years (49-84 years). Median expected years of schooling is 13.5 years (5-20 years). Median gross national income per capita (GNI) is 12 040 (581-123 124). Median maternal mortality ratio is 49 (1-1 100). Median adolescent birth rate is 47 (1-205). Median percetange of female representatives in parliament is 1% (0-58%).   
+    
+Expected years of schooling correlates positively with life expectancy, GNI, and percentage of female representatives in parliament. It correlates negatively with maternal mortality ratio and adolescent birth rate. Life expectancy also correlates positively with GNI, and negatively with maternal mortality ratio and adolescent birth rate. Maternal mortality ratio correlates negatively with GNI and adolescent birth rate. These findings make a lot of sense.  
+    
+## Principal component analysis (PCA)  
+  
+```{r}
+# perform principal component analysis (with the SVD method)
+pca_human <- prcomp(human)
+
+# draw a biplot of the principal component representation and the original variables
+biplot(pca_human, choices = 1:2, cex = c(0.8, 1), col = c("grey40", "deeppink2"))
+```  
+  
+## Principal component analysis (PCA) with standardized variables  
+  
+```{r}
+# standardize the variables
+human_std <- scale(human)
+
+# perform principal component analysis (with the SVD method)
+pca_human_std <- prcomp(human_std)
+
+# draw a biplot of the principal component representation and the original variables
+biplot(pca_human_std, choices = 1:2, cex = c(0.8, 1), col = c("grey40", "deeppink2"))
+text(-8, 9, "developed countries", col="blue")
+text(10, 3, "developing countries", col="blue")
+text(0, -9, "Arab countries", col="blue")
+
+# create and print out a summary of pca_human_std
+s <- summary(pca_human_std)
+
+# rounded percentanges of variance captured by each PC
+pca_pr <- round(100*s$importance[2, ], digits = 1)
+
+# print out the percentages of variance
+pca_pr
+```   
+  
+The results are different, because in the non-standardized data the variables have different scales. Therefore the variances in variables in the non-standardized data are higher. That is also why the first PCA biplot is dominated by GNI (widest scale).  
+  
+According to the biplot of the standardized dataset, African countries (so-called developing countries) seem to have higher adolescent birt rate and maternal mortality ratio. Many European and other western countries, as well as Australia and Singapore, have higher life expectancy and expected years of schooling, as well as higher proportion of women in parliament. These countries can also be descriped as welfare states or developed countries. In the Arab countries, the proportion of women in parliament is low, as well as proportion of women working compared to men.     
+  
+The first two principal components of the standardized dataset explain 53.6% and 16.2% of variability, respectively. PC1 is positively correlated with Mat.Mor and Ado.Birth, and negatively correlated with Edu.Exp, Life.Exp, GNI, and Edu2.FM. PC2 is positively correlated with Parli.F and Labo.FM.      
+  
+```{r}
+# Work with the exercise in this chunk, step-by-step. Fix the R code!
+# pca_human, dplyr are available
+
+# create and print out a summary of pca_human
+s <- summary(pca_human_std)
+s
+
+# rounded percentanges of variance captured by each PC
+pca_pr <- round(100*s$importance[2, ], digits = 1)
+
+# print out the percentages of variance
+pca_pr
+
+# create object pc_lab to be used as axis labels
+pc_lab <- paste0(names(pca_pr), " (", pca_pr, "%)")
+
+# draw a biplot
+biplot(pca_human_std, cex = c(0.8, 1), col = c("grey40", "deeppink2"), xlab = pc_lab[1], ylab = pc_lab[2])
+```
+  
+## Multiple Correspondence Analysis (MCA) on the tea data  
+  
+```{r}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(FactoMineR)
+tea <- read.csv("https://raw.githubusercontent.com/KimmoVehkalahti/Helsinki-Open-Data-Science/master/datasets/tea.csv", stringsAsFactors = TRUE)
+
+# Check the structure and dimensions of data
+str(tea)
+dim(tea)
+
+# Browse data
+View(tea)
+
+# column names to keep in the dataset
+keep_columns <- c("Tea", "How", "how", "sugar", "friends", "age_Q", "tearoom", "tea.time")
+
+# select the 'keep_columns' to create a new dataset
+new_tea <- select(tea, all_of(keep_columns))
+
+# Check the summaries and structure of the data
+str(new_tea)
+summary(new_tea)
+
+# visualize the dataset
+pivot_longer(new_tea, cols = everything()) %>% 
+  ggplot(aes(value)) + facet_wrap("name", scales = "free")+geom_bar() + theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8))
+
+# multiple correspondence analysis
+mca <- MCA(new_tea, graph = FALSE)
+
+# summary of the model
+summary(mca)
+
+# visualize MCA
+plot(mca, invisible=c("ind"), habillage = "quali", graph.type = "classic")
+
+library(factoextra)
+fviz_mca_var(mca, choice = "mca.cor", 
+            repel = TRUE, 
+            ggtheme = theme_minimal())
+```   
+  
+For this exercise, tea data from FactoMineR package is used. 300 individuals were asked how they drink tea (18 questions) and what are their product's perception (12 questions). In addition, some personal details were asked (4 questions).  
+  
+There are 300 observations of 36 variables, of which we select 8 variables. 
+  
+Agegroup +60 cluster with drinking black tea. Drinking green tea clusters with drinking tea without friends. Teabag tea is drank not in a tearoom and without additives. Earl Grey is drank with sugar.   
+  
+Variables agegroup and tearoom are most correlated with dimension 1. Friends is most correlates with dimension 2.   
