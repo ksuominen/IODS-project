@@ -53,7 +53,7 @@ Expected years of schooling correlates positively with life expectancy, GNI, and
     
 ## Principal component analysis (PCA)  
   
-```{r}
+```{r, out.width="1000px"}
 # perform principal component analysis (with the SVD method)
 pca_human <- prcomp(human)
 
@@ -63,7 +63,7 @@ biplot(pca_human, choices = 1:2, cex = c(0.8, 1), col = c("grey40", "deeppink2")
   
 ## Principal component analysis (PCA) with standardized variables  
   
-```{r}
+```{r, out.width="1000px"}
 # standardize the variables
 human_std <- scale(human)
 
@@ -92,7 +92,7 @@ According to the biplot of the standardized dataset, African countries (so-calle
   
 The first two principal components of the standardized dataset explain 53.6% and 16.2% of variability, respectively. PC1 is positively correlated with Mat.Mor and Ado.Birth, and negatively correlated with Edu.Exp, Life.Exp, GNI, and Edu2.FM. PC2 is positively correlated with Parli.F and Labo.FM.      
   
-```{r}
+```{r, out.width="1000px"}
 # Work with the exercise in this chunk, step-by-step. Fix the R code!
 # pca_human, dplyr are available
 
