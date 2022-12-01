@@ -58,7 +58,7 @@ Expected years of schooling correlates positively with life expectancy, GNI, and
 pca_human <- prcomp(human)
 
 # draw a biplot of the principal component representation and the original variables
-biplot(pca_human, choices = 1:2, cex = c(0.8, 1), col = c("grey40", "deeppink2"))
+biplot(pca_human, choices = 1:2, cex = c(0.6, 1), col = c("grey40", "deeppink2"))
 ```  
   
 ## Principal component analysis (PCA) with standardized variables  
@@ -71,7 +71,7 @@ human_std <- scale(human)
 pca_human_std <- prcomp(human_std)
 
 # draw a biplot of the principal component representation and the original variables
-biplot(pca_human_std, choices = 1:2, cex = c(0.8, 1), col = c("grey40", "deeppink2"))
+biplot(pca_human_std, choices = 1:2, cex = c(0.6, 1), col = c("grey40", "deeppink2"))
 text(-8, 9, "developed countries", col="blue")
 text(10, 3, "developing countries", col="blue")
 text(0, -9, "Arab countries", col="blue")
@@ -110,7 +110,7 @@ pca_pr
 pc_lab <- paste0(names(pca_pr), " (", pca_pr, "%)")
 
 # draw a biplot
-biplot(pca_human_std, cex = c(0.8, 1), col = c("grey40", "deeppink2"), xlab = pc_lab[1], ylab = pc_lab[2])
+biplot(pca_human_std, cex = c(0.6, 1), col = c("grey40", "deeppink2"), xlab = pc_lab[1], ylab = pc_lab[2])
 ```
   
 ## Multiple Correspondence Analysis (MCA) on the tea data  
