@@ -7,8 +7,7 @@ date()
 ## Short description of dataset   
   
 ```{r}
-library(tidyverse)
-human <- read_csv("./data/human.csv")
+human <- read.table("./data/human.txt", header = TRUE)
 dim(human)
 str(human)
 ```  
@@ -48,7 +47,7 @@ ggpairs(human)
 cor(human) %>% corrplot(., method="circle")
 ```  
   
-Median life expectancy at birth is 74 years (49-84 years). Median expected years of schooling is 13.5 years (5-20 years). Median gross national income per capita (GNI) is 12 040 (581-123 124). Median maternal mortality ratio is 49 (1-1 100). Median adolescent birth rate is 47 (1-205). Median percetange of female representatives in parliament is 1% (0-58%).   
+Median life expectancy at birth is 74 years (49-84 years). Median expected years of schooling is 13.5 years (5-20 years). Median gross national income per capita (GNI) is 12 040 (581-123 124). Median maternal mortality ratio is 49 (1-1 100). Median adolescent birth rate is 47 (1-205). Median percentage of female representatives in parliament is 1% (0-58%).   
     
 Expected years of schooling correlates positively with life expectancy, GNI, and percentage of female representatives in parliament. It correlates negatively with maternal mortality ratio and adolescent birth rate. Life expectancy also correlates positively with GNI, and negatively with maternal mortality ratio and adolescent birth rate. Maternal mortality ratio correlates negatively with GNI and adolescent birth rate. These findings make a lot of sense.  
     
