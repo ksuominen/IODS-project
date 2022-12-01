@@ -3,11 +3,9 @@
 # The data originates from the United Nations Development Programme
 # Original data from: http://hdr.undp.org/en/content/human-development-index-hdi
 
-library(tidyverse)
-
 # Read in the “Human development” and “Gender inequality” data sets
-hd <- read_csv("https://raw.githubusercontent.com/KimmoVehkalahti/Helsinki-Open-Data-Science/master/datasets/human_development.csv")
-gi <- read_csv("https://raw.githubusercontent.com/KimmoVehkalahti/Helsinki-Open-Data-Science/master/datasets/gender_inequality.csv", na = "..")
+hd <- read.csv("https://raw.githubusercontent.com/KimmoVehkalahti/Helsinki-Open-Data-Science/master/datasets/human_development.csv")
+gi <- read.csv("https://raw.githubusercontent.com/KimmoVehkalahti/Helsinki-Open-Data-Science/master/datasets/gender_inequality.csv", na = "..")
 
 # Meta file: https://hdr.undp.org/data-center/human-development-index#/indicies/HDI
 # Technical notes: https://hdr.undp.org/system/files/documents//technical-notes-calculating-human-development-indices.pdf
@@ -45,7 +43,7 @@ write.csv(human, "./data/human.csv", row.names = FALSE)
 # 26.11.2022
 
 # Load the data
-human <- read_csv("./data/human.csv")
+human <- read.csv("./data/human.csv")
 dim(human)
 str(human)
 
@@ -95,4 +93,4 @@ dim(human)
 # There are now 155 observations of 8 variables
 
 # Write to file
-write.csv(human, "./data/human.csv", row.names = TRUE)
+write.table(human, "./data/human.txt", row.names = TRUE)
