@@ -1,0 +1,147 @@
+# Analysis of longitudinal data  
+  
+```{r}
+date()
+```  
+  
+```{r}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(rstatix)
+library(ggpubr)
+```  
+  
+## Analysis of Longitudinal Data I: Graphical Displays and Summary Measure Approach  
+  
+```{r}
+RATSL <- read.table("./data/RATSL.txt", header=TRUE)
+# Factor variables ID and Group
+RATSL$ID <- factor(RATSL$ID)
+RATSL$Group <- factor(RATSL$Group)
+
+# Glimpse the data
+glimpse(RATSL)
+
+# Check the column names
+names(RATSL)
+
+# Look at the structure of dataset
+str(RATSL)
+
+# Print out summaries of the variables
+summary(RATSL)
+```  
+  
+The dataset RATSL is a long format version of data from a nutrition study conducted in three groups of rats. The groups were put on different diets, and each animal’s body weight (grams) was recorded repeatedly (approximately) weekly, except in week seven when two recordings were taken) over a 9-week period.  
+  
+The dataset has 176 rows and 5 columns (ID, group, weight, and day in borth character and integer formats).  
+  
+## Plot the RATSL data    
+```{r}
+# Plot the data
+ggplot(RATSL, aes(x = Time, y = Weight, group = ID)) +
+  geom_line(aes(linetype=Group)) +
+  scale_x_continuous(name = "Time (days)", breaks = seq(0, 60, 10)) +
+  scale_y_continuous(name = "Weight (grams)") + 
+  theme(legend.position = "top")
+
+```  
+  
+## Summary graph  
+  
+```{r}
+# Calculate the weightgain
+RATSL <- 
+  RATSL %>%
+  group_by(ID) %>%
+  mutate(Weightgain = Weight - Weight[Time == 1] ) %>%
+  ungroup()
+
+# Plot the weightgain
+ggplot(RATSL, aes(x = Time, y = Weightgain, group = ID)) +
+  geom_line(aes(linetype=Group)) +
+  scale_x_continuous(name = "Time (days)", breaks = seq(0, 60, 10)) +
+  scale_y_continuous(name = "Weightgain (grams)") + 
+  theme(legend.position = "top")
+
+# Summary data with mean and standard error of weightgain by group and time 
+RATSS <- RATSL %>%
+  group_by(Group, Time) %>%
+  summarise( mean = mean(Weightgain), se = sd(Weightgain) ) %>%
+  ungroup()
+
+# Glimpse the data
+glimpse(RATSS)
+
+# Plot the mean profiles
+ggplot(RATSS, aes(x = Time, y = mean, linetype = Group, shape = Group)) +
+  geom_line() +
+  geom_point(size=3) +
+  geom_errorbar(aes(ymin=mean-se, ymax=mean+se, linetype="1"), width=0.3) +
+  theme(legend.position = c(0.8,0.8)) +
+  scale_y_continuous(name = "mean(Weight) +/- se(Weight)")
+
+```  
+  
+Based on the graph, group 2 seems to have gained most weight in the study period, although group 3 is the heaviest. Group 1 has a lot smaller weight to begin with, why is that? Are the rats of different breed or age?    
+  
+## Checking for outliers  
+  
+```{r}
+# Draw a boxplot of the mean weightgain versus group
+ggplot(RATSL, aes(x = Group, y = Weightgain)) +
+  geom_boxplot() +
+  stat_summary(fun = "mean", geom = "point", shape=23, size=4, fill = "white") +
+  scale_y_continuous(name = "mean weightgain, days 1-64")
+```  
+  
+No outliers detected.  
+  
+```{r}
+# Pairwise t-test comparisons
+pwc <- RATSL %>%
+  pairwise_t_test(Weightgain ~ Group, p.adjust.method = "bonferroni")
+pwc
+
+# Visualization: box plots with p-values
+pwc <- pwc %>% add_xy_position(x = "Group", step.increase = 1)
+ggboxplot(RATSL, x = "Group", y = "Weightgain") +
+  stat_pvalue_manual(pwc, hide.ns = TRUE) 
+
+# Fit the linear model with the mean as the response 
+fit <- lm(Weightgain~Group, data = RATSL)
+summary(fit)
+
+# Compute the analysis of variance table for the fitted model with anova()
+anova(fit)
+```    
+  
+Based on the pairwise t-tests and anova, there seems to be a significant difference in weight gain between groups 1 and 2, and 2 and 3.  
+  
+## Analysis of Longitudinal Data II: Linear Mixed Effects Models for Normal Response Variables  
+  
+```{r}
+BPRSL <- read.table("./data/BPRSL.txt", header=TRUE)
+# Factor treatment & subject
+BPRSL$treatment <- factor(BPRSL$treatment)
+BPRSL$subject <- factor(BPRSL$subject)
+
+# Glimpse the data
+glimpse(BPRSL)
+
+# Check the column names
+names(BPRSL)
+
+# Look at the structure of dataset
+str(BPRSL)
+
+# Print out summaries of the variables
+summary(BPRSL)
+```  
+  
+The dataset BPRSL is a long format version of BPRS, in which 40 male subjects were randomly assigned to one of two treatment groups and each subject was rated on the brief psychiatric rating scale (BPRS) measured before treatment began (week 0) and then at weekly intervals for eight weeks. The BPRS assesses the level of 18 symptom constructs such as hostility, suspiciousness, hallucinations and grandiosity; each of these is rated from one (not present) to seven (extremely severe). The scale is used to evaluate patients suspected of having schizophrenia.  
+  
+The dataset has 360 rows and 5 columns (treatment, subject, bprs, and week in both character and integer formats).   
+  
+  
