@@ -10,6 +10,7 @@ library(tidyr)
 library(ggplot2)
 library(rstatix)
 library(ggpubr)
+library(lme4)
 ```  
   
 ## Analysis of Longitudinal Data I: Graphical Displays and Summary Measure Approach  
@@ -80,11 +81,11 @@ ggplot(RATSS, aes(x = Time, y = mean, linetype = Group, shape = Group)) +
   geom_point(size=3) +
   geom_errorbar(aes(ymin=mean-se, ymax=mean+se, linetype="1"), width=0.3) +
   theme(legend.position = c(0.8,0.8)) +
-  scale_y_continuous(name = "mean(Weight) +/- se(Weight)")
+  scale_y_continuous(name = "mean(Weightgain) +/- se(Weightgain)")
 
 ```  
   
-Based on the graph, group 2 seems to have gained most weight in the study period, although group 3 is the heaviest. Group 1 has a lot smaller weight to begin with, why is that? Are the rats of different breed or age?    
+Based on the graph, group 2 seems to have gained most weight in the study period.    
   
 ## Checking for outliers  
   
@@ -97,6 +98,8 @@ ggplot(RATSL, aes(x = Group, y = Weightgain)) +
 ```  
   
 No outliers detected.  
+  
+##  T-test and Anova  
   
 ```{r}
 # Pairwise t-test comparisons
@@ -143,5 +146,86 @@ summary(BPRSL)
 The dataset BPRSL is a long format version of BPRS, in which 40 male subjects were randomly assigned to one of two treatment groups and each subject was rated on the brief psychiatric rating scale (BPRS) measured before treatment began (week 0) and then at weekly intervals for eight weeks. The BPRS assesses the level of 18 symptom constructs such as hostility, suspiciousness, hallucinations and grandiosity; each of these is rated from one (not present) to seven (extremely severe). The scale is used to evaluate patients suspected of having schizophrenia.  
   
 The dataset has 360 rows and 5 columns (treatment, subject, bprs, and week in both character and integer formats).   
+  
+I ran out of time for the interpretations of this second part.    
+  
+## Plot the BPRLS data  
+  
+```{r}  
+# Plot the data
+ggplot(BPRSL, aes(x = week, y = bprs, linetype = subject)) +
+  geom_line() +
+  scale_linetype_manual(values = rep(1:10, times=4)) +
+  facet_grid(. ~ treatment, labeller = label_both) +
+  theme(legend.position = "none") + 
+  scale_y_continuous(limits = c(min(BPRSL$bprs), max(BPRSL$bprs)))  
+```  
+  
+## The linear model  
+  
+```{r}
+# create a regression model BPRS_reg
+BPRS_reg <- lm(bprs~week+treatment, data=BPRSL)
+
+# print out a summary of the model
+summary(BPRS_reg)
+```  
+  
+## The random intercept model  
+  
+```{r}
+# Create a random intercept model
+BPRS_ref <- lmer(bprs ~ week + treatment + (1 | subject), data = BPRSL, REML = FALSE)
+
+# Print the summary of the model
+summary(BPRS_ref)
+```  
+  
+## Random intercept and random slope model  
+  
+```{r}
+# create a random intercept and random slope model
+BPPS_ref1 <- lmer(bprs ~ week + treatment + (week | subject), data = BPRSL, REML = FALSE)
+
+# print a summary of the model
+summary(BPPS_ref1)
+
+# perform an ANOVA test on the two models
+anova(BPPS_ref1, BPRS_ref)
+```  
+  
+## Random intercept and random slope model with interaction  
+  
+```{r}
+# create a random intercept and random slope model with the interaction
+BPPS_ref2 <- lmer(bprs ~ week + treatment + (week | subject) + week*treatment, data = BPRSL, REML = FALSE)
+
+# print a summary of the model
+summary(BPPS_ref2)
+
+# perform an ANOVA test on the two models
+anova(BPPS_ref2, BPPS_ref1)
+
+# draw the plot of BPRSL with the observed bprs values
+ggplot(BPRSL, aes(x = week, y = bprs, group = subject)) +
+  geom_line() +
+  scale_x_continuous(name = "Time (weeks)", breaks = seq(0, 8, 1)) +
+  scale_y_continuous(name = "bprs") +
+  theme(legend.position = "top")
+
+# Create a vector of the fitted values
+Fitted <- fitted(BPPS_ref2)
+
+# Create a new column fitted to RATSL
+BPRSL$Fitted <- Fitted
+
+# draw the plot of RATSL with the Fitted values of weight
+ggplot(BPRSL, aes(x = week, y = Fitted, group = subject)) +
+  geom_line() +
+  scale_x_continuous(name = "Time (weeks)", breaks = seq(0, 8, 1)) +
+  scale_y_continuous(name = "bprs") +
+  theme(legend.position = "top")
+
+```  
   
   
